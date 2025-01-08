@@ -96,7 +96,7 @@ Converts an HTML string containing a `<table>` to an Excel file and returns it a
 ---
 
 ## Requirements
-- Node.js 14 or later (for Node.js usage).
+- Node.js 18 or later (for Node.js usage).
 - A modern browser (for browser usage).
 
 ---
@@ -107,7 +107,7 @@ Converts an HTML string containing a `<table>` to an Excel file and returns it a
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-username/table-to-excel.git
+git clone https://github.com/KhunKomkrit/table-to-excel.git
 cd table-to-excel
 npm install
 ```
