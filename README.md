@@ -17,7 +17,7 @@ This project provides a utility to convert HTML tables into Excel spreadsheets, 
 Install the package using npm:
 
 ```bash
-npm install html-to-excel-converter
+npm install table-to-excel
 ```
 
 ---
@@ -27,7 +27,7 @@ npm install html-to-excel-converter
 ### Node.js Example
 
 ```typescript
-import { htmlToExcelBlob } from 'html-to-excel-converter';
+import { htmlToExcelBlob } from 'table-to-excel';
 import fs from 'fs';
 
 const html = `
@@ -53,7 +53,7 @@ htmlToExcelBlob(html).then(async (blob) => {
 ### Browser Example
 
 ```typescript
-import { htmlToExcelBlob } from 'html-to-excel-converter';
+import { htmlToExcelBlob } from 'table-to-excel';
 
 const html = `
 <table>
@@ -107,8 +107,8 @@ Converts an HTML string containing a `<table>` to an Excel file and returns it a
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/your-username/html-to-excel-converter.git
-cd html-to-excel-converter
+git clone https://github.com/your-username/table-to-excel.git
+cd table-to-excel
 npm install
 ```
 
