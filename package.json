@@ -23,6 +23,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/KhunKomkrit/table-to-excel.git"
+    "url": "git+https://github.com/KhunKomkrit/table-to-excel.git"
   }
 }
