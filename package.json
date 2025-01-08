@@ -1,5 +1,5 @@
 {
-  "name": "@khunkomkrit/table-to-excel",
+  "name": "@bkfullstack/table-to-excel",
   "version": "1.0.0",
   "description": "A library to convert HTML tables to Excel with inline styles (TypeScript supported).",
   "main": "dist/index.js",
