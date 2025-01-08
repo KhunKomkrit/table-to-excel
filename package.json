@@ -1,0 +1,28 @@
+{
+  "name": "table-to-excel",
+  "version": "1.0.0",
+  "description": "A library to convert HTML tables to Excel with inline styles (TypeScript supported).",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test-file": "ts-node test/testExportFile",
+    "test-blob": "ts-node test/testExportBlob"
+  },
+  "author": "BKFullStack",
+  "license": "MIT",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "jsdom": "^25.0.1"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^20.6.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KhunKomkrit/table-to-excel.git"
+  }
+}
