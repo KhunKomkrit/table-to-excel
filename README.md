@@ -100,6 +100,16 @@ Converts an HTML string containing a `<table>` to an Excel file and returns it a
 #### Returns:
 - `Promise<Blob>`: A Blob representing the Excel file.
 
+### `htmlToExcelFile(html: string, outputFilePath: string): Promise<void>`
+Converts an HTML string containing a `<table>` to an Excel file and returns it as a `Blob`.
+
+#### Parameters:
+- `html` (string): The HTML string containing the table to convert.
+- `outputFilePath` (string): The path to the output file.
+
+#### Returns:
+- `Promise<void>`: A Promise that resolves when the Excel file is created.
+
 ---
 
 ## Requirements
