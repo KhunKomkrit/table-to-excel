@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "prepublishOnly": "npm run build",
     "build": "tsc",
     "test-file": "ts-node test/testExportFile",
     "test-blob": "ts-node test/testExportBlob"
