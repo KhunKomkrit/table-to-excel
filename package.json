@@ -25,5 +25,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/KhunKomkrit/table-to-excel.git"
-  }
+  },
+  "keywords": [
+    "html to excel",
+    "html to xlsx",
+    "html to xls"
+  ]
 }
