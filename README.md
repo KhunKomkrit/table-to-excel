@@ -27,7 +27,7 @@ npm install @bkfullstack/table-to-excel
 ### Node.js Example
 
 ```typescript
-import { htmlToExcelBlob } from '@bkfullstack/table-to-excel';
+import { htmlToExcelBlob, htmlToExcelFile } from '@bkfullstack/table-to-excel';
 import fs from 'fs';
 
 const html = `
@@ -47,6 +47,12 @@ htmlToExcelBlob(html).then(async (blob) => {
   const buffer = Buffer.from(await blob.arrayBuffer());
   fs.writeFileSync('output.xlsx', buffer);
   console.log('Excel file created successfully as output.xlsx');
+});
+
+htmlToExcelFile(html, 'output.xlsx').then(async (file) => {
+  console.log('Excel file created successfully as output.xlsx');
+}).catch((error) => {
+  console.error('Error creating Excel file:', error);
 });
 ```
 
@@ -78,6 +84,7 @@ htmlToExcelBlob(html).then((blob) => {
   document.body.removeChild(a);
   console.log('Excel file downloaded successfully');
 });
+
 ```
 
 ---
