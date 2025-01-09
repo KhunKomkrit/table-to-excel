@@ -30,20 +30,22 @@ function generateHtmlTable(html: string): ExcelJS.Workbook {
   
     tables.forEach((table, tableIndex) => {
       const rows = table.querySelectorAll('tr');
-  
-      rows.forEach((row, rowIndex) => {
+      let currentCol = 1
+      rows.forEach((row: HTMLTableRowElement, rowIndex) => {
         const cells = row.querySelectorAll('th, td');
         const newRow = worksheet.addRow([]);
   
-        cells.forEach((cell, colIndex) => {
+        cells.forEach((cell) => {
           const value = cell.textContent?.trim() || '';
           const style = (cell as HTMLElement).style;
 
           const colspan = parseInt(cell.getAttribute('colspan') || '1', 10);
           const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10);
-  
-          const excelCell = newRow.getCell(colIndex + 1);
+
+          const excelCell = newRow.getCell(currentCol);
           excelCell.value = value;
+
+          
   
           if (style.backgroundColor) {
             const color = style.backgroundColor.replace('rgb(', '').replace(')', '').split(',');
@@ -80,12 +82,22 @@ function generateHtmlTable(html: string): ExcelJS.Workbook {
 
           if (colspan > 1 || rowspan > 1) {
             const startRow = newRow.number;
-            const startCol = colIndex + 1;
+            const startCol = currentCol;
             const endRow = startRow + rowspan - 1;
             const endCol = startCol + colspan - 1;
       
-            worksheet.mergeCells(startRow, startCol, endRow, endCol);
+            try {
+              worksheet.mergeCells(startRow, startCol, endRow, endCol);
+            } catch (error: unknown) {
+              if (error instanceof Error) {
+                console.warn(`Failed to merge cells from (${startRow}, ${startCol}) to (${endRow}, ${endCol}):`, error.message);
+              } else {
+                console.warn(`Failed to merge cells from (${startRow}, ${startCol}) to (${endRow}, ${endCol}):`, String(error));
+              }
+            }
           }
+
+          currentCol += colspan;
 
           if (style.textAlign) {
             const alignmentMap: Record<string, 'left' | 'center' | 'right'> = {
@@ -99,12 +111,13 @@ function generateHtmlTable(html: string): ExcelJS.Workbook {
               excelCell.alignment = { horizontal: alignValue };
             }
           }
-
         });
   
         if (rowIndex === rows.length - 1 && tableIndex < tables.length - 1) {
           worksheet.addRow([]);
         }
+
+        currentCol = 1;
       });
     });
   
