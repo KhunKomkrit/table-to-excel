@@ -3,3 +3,4 @@ test/output-blob.xlsx
 test/output.xlsx
 src/*
 test/*
+tsconfig.json
