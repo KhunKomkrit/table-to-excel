@@ -1,6 +1,11 @@
 import ExcelJS from "exceljs";
 import { JSDOM } from "jsdom";
 
+interface MergedCellData {
+  value: string;
+  style: CSSStyleDeclaration;
+}
+
 export async function htmlToExcel(
   html: string,
   outputFilePath: string
@@ -30,96 +35,91 @@ function generateHtmlTable(html: string): ExcelJS.Workbook {
   
     tables.forEach((table, tableIndex) => {
       const rows = table.querySelectorAll('tr');
-      let currentCol = 1
-      rows.forEach((row: HTMLTableRowElement, rowIndex) => {
-        const cells = row.querySelectorAll('th, td');
+      
+      // First pass: Create all rows and cells with basic values
+      let rowNumber = worksheet.rowCount + 1;
+      const mergeCells: Array<{
+        startRow: number;
+        startCol: number;
+        endRow: number;
+        endCol: number;
+        value: string;
+        style: CSSStyleDeclaration;
+      }> = [];
+
+      const occupiedCells = new Set<string>();
+
+      rows.forEach((row, rowIndex) => {
         const newRow = worksheet.addRow([]);
-  
+        const cells = row.querySelectorAll('th, td');
+        let colIndex = 1;
+
         cells.forEach((cell) => {
+
+          while (occupiedCells.has(`${rowNumber + rowIndex},${colIndex}`)) {
+            colIndex++;
+          }
+
           const value = cell.textContent?.trim() || '';
           const style = (cell as HTMLElement).style;
-
           const colspan = parseInt(cell.getAttribute('colspan') || '1', 10);
           const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10);
 
-          const excelCell = newRow.getCell(currentCol);
+          const excelCell = newRow.getCell(colIndex);
           excelCell.value = value;
-
-          
-  
-          if (style.backgroundColor) {
-            const color = style.backgroundColor.replace('rgb(', '').replace(')', '').split(',');
-            excelCell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: {
-                argb: `FF${parseInt(color[0]).toString(16).padStart(2, '0')}${parseInt(color[1])
-                  .toString(16)
-                  .padStart(2, '0')}${parseInt(color[2]).toString(16).padStart(2, '0')}`,
-              },
-            };
-          }
-  
-          if (style.color) {
-            const color = style.color.replace('rgb(', '').replace(')', '').split(',');
-            excelCell.font = {
-              color: {
-                argb: `FF${parseInt(color[0]).toString(16).padStart(2, '0')}${parseInt(color[1])
-                  .toString(16)
-                  .padStart(2, '0')}${parseInt(color[2]).toString(16).padStart(2, '0')}`,
-              },
-            };
-          }
-
-          if (style.border || style.borderWidth) {
-            excelCell.border = {
-              top: { style: 'thin', color: { argb: 'FF000000' } },
-              left: { style: 'thin', color: { argb: 'FF000000' } },
-              bottom: { style: 'thin', color: { argb: 'FF000000' } },
-              right: { style: 'thin', color: { argb: 'FF000000' } },
-            };
-          }
+          applyStyles(excelCell, style);
 
           if (colspan > 1 || rowspan > 1) {
-            const startRow = newRow.number;
-            const startCol = currentCol;
-            const endRow = startRow + rowspan - 1;
-            const endCol = startCol + colspan - 1;
-      
-            try {
-              worksheet.mergeCells(startRow, startCol, endRow, endCol);
-            } catch (error: unknown) {
-              if (error instanceof Error) {
-                console.warn(`Failed to merge cells from (${startRow}, ${startCol}) to (${endRow}, ${endCol}):`, error.message);
-              } else {
-                console.warn(`Failed to merge cells from (${startRow}, ${startCol}) to (${endRow}, ${endCol}):`, String(error));
+            mergeCells.push({
+              startRow: rowNumber + rowIndex,
+              startCol: colIndex,
+              endRow: rowNumber + rowIndex + rowspan - 1,
+              endCol: colIndex + colspan - 1,
+              value,
+              style
+            });
+
+            for (let r = 0; r < rowspan; r++) {
+              for (let c = 0; c < colspan; c++) {
+                occupiedCells.add(`${rowNumber + rowIndex + r},${colIndex + c}`);
               }
             }
           }
 
-          currentCol += colspan;
-
-          if (style.textAlign) {
-            const alignmentMap: Record<string, 'left' | 'center' | 'right'> = {
-              left: 'left',
-              center: 'center',
-              right: 'right',
-            };
-        
-            const alignValue = alignmentMap[style.textAlign as keyof typeof alignmentMap];
-            if (alignValue) {
-              excelCell.alignment = { horizontal: alignValue };
-            }
-          }
+          colIndex += colspan;
         });
-  
-        if (rowIndex === rows.length - 1 && tableIndex < tables.length - 1) {
-          worksheet.addRow([]);
-        }
-
-        currentCol = 1;
       });
+
+      mergeCells.forEach(({ startRow, startCol, endRow, endCol, value, style }) => {
+        try {
+          worksheet.mergeCells(startRow, startCol, endRow, endCol);
+          const cell = worksheet.getCell(startRow, startCol);
+          cell.value = value;
+          applyStyles(cell, style);
+        } catch (error) {
+          console.warn(`Failed to merge cells from (${startRow}, ${startCol}) to (${endRow}, ${endCol}):`, error);
+        }
+      });
+
+      if (tableIndex < tables.length - 1) {
+        worksheet.addRow([]);
+      }
     });
   
     return workbook;
+  }
+
+  function applyStyles(excelCell: ExcelJS.Cell, style: CSSStyleDeclaration) {
+    if (style.backgroundColor) {
+      const color = style.backgroundColor.replace('rgb(', '').replace(')', '').split(',');
+      excelCell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: {
+          argb: `FF${parseInt(color[0]).toString(16).padStart(2, '0')}${parseInt(color[1])
+            .toString(16)
+            .padStart(2, '0')}${parseInt(color[2]).toString(16).padStart(2, '0')}`,
+        },
+      };
+    }
   }
