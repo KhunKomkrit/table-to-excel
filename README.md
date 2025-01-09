@@ -6,9 +6,9 @@ This project provides a utility to convert HTML tables into Excel spreadsheets, 
 
 ## Features
 - Parses HTML tables and converts them to Excel files.
-- Supports inline styles like `background-color` and `color`.
+- Supports inline styles like `background-color`,`color`,`text-align`,`border`,`colspan`,`rowspan`.
 - Works in both **Node.js** and **browser** environments.
-- Returns the Excel file as a `Blob`.
+- Returns the Excel file as a `Blob` or `File`.
 
 ---
 
@@ -17,7 +17,7 @@ This project provides a utility to convert HTML tables into Excel spreadsheets, 
 Install the package using npm:
 
 ```bash
-npm install table-to-excel
+npm install @bkfullstack/table-to-excel
 ```
 
 ---
@@ -27,7 +27,7 @@ npm install table-to-excel
 ### Node.js Example
 
 ```typescript
-import { htmlToExcelBlob } from 'table-to-excel';
+import { htmlToExcelBlob } from '@bkfullstack/table-to-excel';
 import fs from 'fs';
 
 const html = `
@@ -53,7 +53,7 @@ htmlToExcelBlob(html).then(async (blob) => {
 ### Browser Example
 
 ```typescript
-import { htmlToExcelBlob } from 'table-to-excel';
+import { htmlToExcelBlob } from '@bkfullstack/table-to-excel';
 
 const html = `
 <table>
@@ -98,37 +98,6 @@ Converts an HTML string containing a `<table>` to an Excel file and returns it a
 ## Requirements
 - Node.js 18 or later (for Node.js usage).
 - A modern browser (for browser usage).
-
----
-
-## Development
-
-### Setup
-Clone the repository and install dependencies:
-
-```bash
-git clone https://github.com/KhunKomkrit/table-to-excel.git
-cd table-to-excel
-npm install
-```
-
-### Run Tests
-
-To run the tests:
-
-```bash
-npm test
-```
-
----
-
-## Contribution
-Contributions are welcome! Please follow these steps:
-1. Fork the repository.
-2. Create a new branch for your feature: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -m "Add feature-name"`.
-4. Push to your branch: `git push origin feature-name`.
-5. Create a pull request.
 
 ---
 
