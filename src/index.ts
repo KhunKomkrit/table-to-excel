@@ -18,65 +18,95 @@ export async function htmlToExcelBlob(html: string): Promise<Blob> {
 }
 
 function generateHtmlTable(html: string): ExcelJS.Workbook {
-  const dom = new JSDOM(html);
-  const table = dom.window.document.querySelector("table");
-  if (!table) {
-    throw new Error("No table element found in the HTML.");
-  }
+    const dom = new JSDOM(html);
+    const tables = dom.window.document.querySelectorAll('table');
+  
+    if (!tables.length) {
+      throw new Error('No table elements found in the HTML.');
+    }
+  
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Worksheet');
+  
+    tables.forEach((table, tableIndex) => {
+      const rows = table.querySelectorAll('tr');
+  
+      rows.forEach((row, rowIndex) => {
+        const cells = row.querySelectorAll('th, td');
+        const newRow = worksheet.addRow([]);
+  
+        cells.forEach((cell, colIndex) => {
+          const value = cell.textContent?.trim() || '';
+          const style = (cell as HTMLElement).style;
 
-  const rows = table.querySelectorAll("tr");
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet("Styled Sheet");
+          const colspan = parseInt(cell.getAttribute('colspan') || '1', 10);
+          const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10);
+  
+          const excelCell = newRow.getCell(colIndex + 1);
+          excelCell.value = value;
+  
+          if (style.backgroundColor) {
+            const color = style.backgroundColor.replace('rgb(', '').replace(')', '').split(',');
+            excelCell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: {
+                argb: `FF${parseInt(color[0]).toString(16).padStart(2, '0')}${parseInt(color[1])
+                  .toString(16)
+                  .padStart(2, '0')}${parseInt(color[2]).toString(16).padStart(2, '0')}`,
+              },
+            };
+          }
+  
+          if (style.color) {
+            const color = style.color.replace('rgb(', '').replace(')', '').split(',');
+            excelCell.font = {
+              color: {
+                argb: `FF${parseInt(color[0]).toString(16).padStart(2, '0')}${parseInt(color[1])
+                  .toString(16)
+                  .padStart(2, '0')}${parseInt(color[2]).toString(16).padStart(2, '0')}`,
+              },
+            };
+          }
 
-  rows.forEach((row) => {
-    const cells = row.querySelectorAll("th, td");
-    const newRow = worksheet.addRow([]);
+          if (style.border || style.borderWidth) {
+            excelCell.border = {
+              top: { style: 'thin', color: { argb: 'FF000000' } },
+              left: { style: 'thin', color: { argb: 'FF000000' } },
+              bottom: { style: 'thin', color: { argb: 'FF000000' } },
+              right: { style: 'thin', color: { argb: 'FF000000' } },
+            };
+          }
 
-    cells.forEach((cell, colIndex) => {
-      const value = cell.textContent?.trim() || "";
-      const style = (cell as HTMLElement).style;
+          if (colspan > 1 || rowspan > 1) {
+            const startRow = newRow.number;
+            const startCol = colIndex + 1;
+            const endRow = startRow + rowspan - 1;
+            const endCol = startCol + colspan - 1;
+      
+            worksheet.mergeCells(startRow, startCol, endRow, endCol);
+          }
 
-      const excelCell = newRow.getCell(colIndex + 1);
-      excelCell.value = value;
+          if (style.textAlign) {
+            const alignmentMap: Record<string, 'left' | 'center' | 'right'> = {
+              left: 'left',
+              center: 'center',
+              right: 'right',
+            };
+        
+            const alignValue = alignmentMap[style.textAlign as keyof typeof alignmentMap];
+            if (alignValue) {
+              excelCell.alignment = { horizontal: alignValue };
+            }
+          }
 
-      if (style.backgroundColor) {
-        const color = style.backgroundColor
-          .replace("rgb(", "")
-          .replace(")", "")
-          .split(",");
-        excelCell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: {
-            argb: `FF${parseInt(color[0])
-              .toString(16)
-              .padStart(2, "0")}${parseInt(color[1])
-              .toString(16)
-              .padStart(2, "0")}${parseInt(color[2])
-              .toString(16)
-              .padStart(2, "0")}`,
-          },
-        };
-      }
-
-      if (style.color) {
-        const color = style.color
-          .replace("rgb(", "")
-          .replace(")", "")
-          .split(",");
-        excelCell.font = {
-          color: {
-            argb: `FF${parseInt(color[0])
-              .toString(16)
-              .padStart(2, "0")}${parseInt(color[1])
-              .toString(16)
-              .padStart(2, "0")}${parseInt(color[2])
-              .toString(16)
-              .padStart(2, "0")}`,
-          },
-        };
-      }
+        });
+  
+        if (rowIndex === rows.length - 1 && tableIndex < tables.length - 1) {
+          worksheet.addRow([]);
+        }
+      });
     });
-  });
-  return workbook;
-}
+  
+    return workbook;
+  }
