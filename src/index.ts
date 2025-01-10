@@ -122,4 +122,37 @@ function generateHtmlTable(html: string): ExcelJS.Workbook {
         },
       };
     }
+
+    if (style.color) {
+      const color = style.color.replace('rgb(', '').replace(')', '').split(',');
+      excelCell.font = {
+        color: {
+          argb: `FF${parseInt(color[0]).toString(16).padStart(2, '0')}${parseInt(color[1])
+            .toString(16)
+            .padStart(2, '0')}${parseInt(color[2]).toString(16).padStart(2, '0')}`,
+        },
+      };
+    }
+
+    if (style.border || style.borderWidth) {
+      excelCell.border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } },
+      };
+    }
+
+    if (style.textAlign) {
+      const alignmentMap: Record<string, 'left' | 'center' | 'right'> = {
+        left: 'left',
+        center: 'center',
+        right: 'right',
+      };
+
+      const alignValue = alignmentMap[style.textAlign as keyof typeof alignmentMap];
+    if (alignValue) {
+      excelCell.alignment = { horizontal: alignValue };
+    }
   }
+}
